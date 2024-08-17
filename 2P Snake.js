@@ -1,11 +1,15 @@
 /*
-First time? Check out the tutorial game:
-https://sprig.hackclub.com/gallery/getting_started
-
 @title: 2P Snake
 @author: Niyaz
 @tags: []
 @addedOn: 2024-08-11
+
+Press any key to start playing.
+
+2 Player Snake. Get as many fruit of your color 
+as you can in a minute. The one with more fruits after 60s
+wins. If you collide with something before 60s, you lose 
+regardless of your score.
 */
 
 // Define the 2 player snakes
@@ -23,17 +27,17 @@ setLegend(
     bitmap`
 3333333333333333
 3333333333333333
-3333003333300333
+3330000333000033
+3330200333020033
 3330000333000033
 3330000333000033
-3333003333300333
 3333333333333333
 3333333333333333
-3000000000000003
-3300000000000033
-3330000000000333
-3333000000003333
-3333300000033333
+3333333333333333
+3333333333333333
+3333333333333333
+3333333333333333
+3333333333333333
 3333333333333333
 3333333333333333
 3333333333333333`,
@@ -43,17 +47,17 @@ setLegend(
     bitmap`
 7777777777777777
 7777777777777777
-7770077777007777
-7770007770007777
-7770007770007777
-7770007770007777
+7770077777000777
+7770000770000777
+7770020770200777
+7770000770000777
 7777777777777777
 7777777777777777
-7777000000077777
-7770000000007777
-7700000000000777
-7700000000000777
-7700000000000777
+7777777777777777
+7777777777777777
+7777777777777777
+7777777777777777
+7777777777777777
 7777777777777777
 7777777777777777
 7777777777777777`,
@@ -101,42 +105,42 @@ setLegend(
   [
     player1Apple,
     bitmap`
-.........0......
-........0D0.....
-.......0D40.....
-.....004400.....
-....03444330....
-...0333333330...
-..033333333330..
-..033333333330..
-.03333333333330.
-.03333333333330.
-.03333333333330.
-.03333333333330.
-..033333333330..
-...0333333330...
-....03333330....
-.....000000.....`,
+................
+.........D......
+........DD......
+.......DD.......
+.....3DDD33.....
+....33333333....
+...3333333333...
+...3333333333...
+..333333333333..
+..333333333333..
+..333333333333..
+..333333333333..
+...3333333333...
+....33333333....
+.....333333.....
+................`,
   ],
   [
     player2Apple,
     bitmap`
-.........0......
-........0D0.....
-.......0D40.....
-.....004400.....
-....05444550....
-...0555555550...
-..055555555550..
-..055555555550..
-.05555555555550.
-.05555555555550.
-.05555555555550.
-.05555555555550.
-..055555555550..
-...0555555550...
-....05555550....
-.....000000.....`,
+................
+.........D......
+........DD......
+.......DD.......
+.....5DDD55.....
+....55555555....
+...5555555555...
+...5555555555...
+..555555555555..
+..555555555555..
+..555555555555..
+..555555555555..
+...5555555555...
+....55555555....
+.....555555.....
+................`,
   ],
   [
     background,
@@ -162,8 +166,8 @@ setLegend(
 
 const level = map`
 ..................
-.b................
-...............f..
+..................
+.a..............f.
 ..................
 ..................
 ..................
@@ -175,14 +179,33 @@ const level = map`
 ..................
 ..................
 ..................
-..e.............a.
+.e..............b.
 ..................`;
 setMap(level);
 setBackground(background);
 
+// Start playing
+let gameLost = true;
+const allKeys = ["w", "a", "s", "d", "i", "j", "k", "l"];
+allKeys.forEach((key) => {
+  onInput(key, () => {
+    if (gameLost) {
+      gameLost = false;
+      clearText();
+      // Reset game here
+      aDir = "S";
+      bDir = "N";
+      snakeA = [];
+      snakeB = [];
+      addSnake1 = false;
+      addSnake2 = false;
+    }
+  });
+});
+
 // Track directions (NSEW as 0123) for both snakes
-let aDir = "N";
-let bDir = "S";
+let aDir = "S";
+let bDir = "N";
 let lastPosA, lastPosB;
 let snakeA = [];
 let snakeB = [];
@@ -191,36 +214,36 @@ let addSnake2 = false;
 
 // Player 1
 onInput("w", () => {
-  if (!(aDir == "S")) aDir = "N";
+  if (!(aDir == "S") || snakeA.length == 0) aDir = "N";
 });
 
 onInput("a", () => {
-  if (!(aDir == "E")) aDir = "W";
+  if (!(aDir == "E") || snakeA.length == 0) aDir = "W";
 });
 
 onInput("s", () => {
-  if (!(aDir == "N")) aDir = "S";
+  if (!(aDir == "N") || snakeA.length == 0) aDir = "S";
 });
 
 onInput("d", () => {
-  if (!(aDir == "W")) aDir = "E";
+  if (!(aDir == "W") || snakeA.length == 0) aDir = "E";
 });
 
 // Player 2
 onInput("i", () => {
-  if (!(bDir == "S")) bDir = "N";
+  if (!(bDir == "S") || snakeB.length == 0) bDir = "N";
 });
 
 onInput("j", () => {
-  if (!(bDir == "E")) bDir = "W";
+  if (!(bDir == "E") || snakeB.length == 0) bDir = "W";
 });
 
 onInput("k", () => {
-  if (!(bDir == "N")) bDir = "S";
+  if (!(bDir == "N") || snakeB.length == 0) bDir = "S";
 });
 
 onInput("l", () => {
-  if (!(bDir == "W")) bDir = "E";
+  if (!(bDir == "W") || snakeB.length == 0) bDir = "E";
 });
 
 // Get next position of both snakes
@@ -271,14 +294,12 @@ function getNextPos() {
 }
 
 // Update the snakes
-function updateSnakes(nextPos) {
+function updateSnake(nextPos) {
   // Check if there's a collision with the apples
-  const p1 = getFirst(player1);
-  const p2 = getFirst(player2);
   appleA = getFirst(player1Apple);
   appleB = getFirst(player2Apple);
 
-  // Update snake
+  // Decide whether to add a new snake body
   if (appleA.x === nextPos[0].x && appleA.y === nextPos[0].y) {
     addSnake1 = true;
     appleA.remove();
@@ -287,6 +308,13 @@ function updateSnakes(nextPos) {
     addSnake2 = true;
     appleB.remove();
   }
+
+  // Update apples and snake body/head
+  updateBodyPositions(nextPos);
+  updateHeadPositions(nextPos);
+  summonApples();
+  displayScore();
+  checkLoss();
 }
 
 // Update body positions
@@ -294,6 +322,7 @@ function updateBodyPositions() {
   const p1 = getFirst(player1);
   const p2 = getFirst(player2);
 
+  // Functions to add a new snake body at current head position
   function addSnake1AtCurrentPos() {
     addSprite(p1.x, p1.y, player1Bod);
     // Find the snake body and add it to the snake list
@@ -308,7 +337,7 @@ function updateBodyPositions() {
     snakeB.unshift(newSnake);
   }
 
-  // Pop off the last body if needed
+  // Update snake body (Pop off the last body if needed)
   if (addSnake1) {
     addSnake1AtCurrentPos();
     addSnake1 = false;
@@ -325,37 +354,18 @@ function updateBodyPositions() {
   }
 }
 
-// Update the position of each head
+// Update the position of each head (based on movement direction)
 function updateHeadPositions(nextPos) {
-  let p1 = getFirst(player1);
-  let p2 = getFirst(player2);
+  const p1 = getFirst(player1);
+  const p2 = getFirst(player2);
   p1.x = nextPos[0].x;
   p1.y = nextPos[0].y;
   p2.x = nextPos[1].x;
   p2.y = nextPos[1].y;
 }
 
-// Get all unoccupied spaces except background
-function getUnoccupiedSpaces() {
-  const allSprites = getAll();
-  let unoccupiedSpaces = [];
-
-  for (let x = 0; x < width(); x++) {
-    for (let y = 0; y < height(); y++) {
-      if (!allSprites.some((sprite) => sprite.x == x && sprite.y == y)) {
-        unoccupiedSpaces.push({ x: x, y: y });
-      }
-    }
-  }
-
-  return unoccupiedSpaces;
-}
-
 // Summon apples
 function summonApples() {
-  const p1Apples = getAll(player1Apple);
-  const p2Apples = getAll(player2Apple);
-
   // Decide on free spaces for apples
   const spaces = getUnoccupiedSpaces();
   const p1Space = spaces[Math.floor(Math.random() * spaces.length)];
@@ -371,20 +381,99 @@ function summonApples() {
     addSprite(p2Space.x, p2Space.y, player2Apple);
 }
 
-// Setup game loop
-let gameIntervals = [];
-gameIntervals.push(
-  setInterval(() => {
-    const newPos = getNextPos();
-    updateSnakes(newPos);
-    updateBodyPositions(newPos);
-    updateHeadPositions(newPos);
-    summonApples();
-  }, 90)
-);
-
-// function to stop the whole game
-function stopGame() {
-  gameIntervals.forEach((intervalId) => clearInterval(intervalId));
-  isRunning = false;
+// Get all unoccupied spaces except background
+function getUnoccupiedSpaces() {
+  const allSprites = getAll();
+  let unoccupiedSpaces = [];
+  // Iterate and select tiles with no sprite
+  for (let x = 0; x < width(); x++) {
+    for (let y = 0; y < height(); y++) {
+      if (!allSprites.some((sprite) => sprite.x == x && sprite.y == y)) {
+        unoccupiedSpaces.push({ x: x, y: y });
+      }
+    }
+  }
+  return unoccupiedSpaces;
 }
+
+// Display game score
+function displayScore() {
+  const p1Score = snakeA.length;
+  const p2Score = snakeB.length;
+
+  // Display the scores
+  addText(String(p1Score), { x: 2, y: 1, color: color`3` });
+  addText(String(p2Score), { x: width() - 1, y: 1, color: color`5` });
+}
+
+// Check game loss
+function checkLoss() {
+  const bodies = getAll(player1Bod).concat(getAll(player2Bod));
+
+  // Carries out what is required on losing
+  function handleLoss() {
+    gameLost = true;
+    const p1Score = snakeA.length;
+    const p2Score = snakeB.length;
+
+    // Display score
+    if (p1Score > p2Score) {
+      addText(
+        "Red wins!",
+        (options = {
+          x: Math.floor(width() / 2),
+          y: Math.floor(height() / 2),
+          color: color`0`,
+        })
+      );
+    } else if (p1Score < p2Score) {
+      addText(
+        "Blue wins!",
+        (options = {
+          x: Math.floor(width() / 2),
+          y: Math.floor(height() / 2),
+          color: color`0`,
+        })
+      );
+    } else {
+      addText(
+        "Tie!",
+        (options = {
+          x: Math.floor(width() / 2),
+          y: Math.floor(height() / 2),
+          color: color`0`,
+        })
+      );
+    }
+    addText(
+      "Press any key to restart",
+      (options = {
+        x: Math.floor(width() / 2) - 10,
+        y: Math.floor(height() / 2),
+        color: color`0`,
+      })
+    );
+  }
+
+  // Check for player 1's loss
+  const p1 = getFirst(player1);
+  const p1LossSprites = bodies.concat(getAll(player2));
+  for (sprite of p1LossSprites) {
+    if (sprite.x === p1.x && sprite.y === p1.y) handleLoss();
+  }
+
+  // Check for player 2's loss
+  const p2 = getFirst(player2);
+  const p2LossSprites = bodies.concat(getAll(player1));
+  for (sprite of p2LossSprites) {
+    if (sprite.x === p2.x && sprite.y === p2.y) handleLoss();
+  }
+}
+
+// Setup game loop
+setInterval(() => {
+  const nextPos = getNextPos();
+  if (!gameLost) {
+    updateSnake(nextPos);
+  }
+}, 100);
