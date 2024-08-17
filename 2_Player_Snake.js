@@ -1,7 +1,7 @@
 /*
 @title: 2 Player Snake
 @author: Mohamed Shahul Hameed Niyaz
-@tags: ['multiplayer', 'classic']
+@tags: ['multiplayer', 'classic', 'snake']
 @addedOn: 2024-08-11
 
 Press any key to start playing.
@@ -13,7 +13,7 @@ Hitting a fruit that's not your color will minus points.
 The one with more fruits after 60s wins. 
 
 When a collision happens before 60s, whoever was responsible
-for the collision (i.e. had the last input) will lose
+for the collision (i.e. had the last input) will lose.
 */
 
 // Define the 2 player snakes
