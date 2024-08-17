@@ -1,14 +1,18 @@
 /*
-@title: 2P Snake
-@author: Niyaz
-@tags: []
+@title: 2 Player Snake
+@author: Mohamed Shahul Hameed Niyaz
+@tags: ['multiplayer', 'classic']
 @addedOn: 2024-08-11
 
 Press any key to start playing.
+Use WASD to control Red.
+Use IJKL to control Blue.
 
-2 Player Snake. Get as many fruit of your color 
-as you can in a minute. The one with more fruits after 60s
-wins. When a collision happens before 60s, whoever was responsible
+Get as many fruit of your color as you can in a minute.
+Hitting a fruit that's not your color will minus points.
+The one with more fruits after 60s wins. 
+
+When a collision happens before 60s, whoever was responsible
 for the collision (i.e. had the last input) will lose
 */
 
@@ -19,7 +23,11 @@ const player1Bod = "c";
 const player2Bod = "d";
 const player1Apple = "e";
 const player2Apple = "f";
-const background = "z";
+const background = "g";
+// Decor
+const bush = "h";
+const flowers = "i";
+const grass = "j";
 
 setLegend(
   [
@@ -105,107 +113,144 @@ setLegend(
   [
     player1Apple,
     bitmap`
-................
-.........D......
 ........DD......
-.......DD.......
-.....3DDD33.....
-....33333333....
-...3333333333...
-...3333333333...
-..333333333333..
-..333333333333..
-..333333333333..
-..333333333333..
-...3333333333...
-....33333333....
-.....333333.....
-................`,
+...CCCDDDCCCC...
+..C333DDD3333C..
+.C3333DD333333C.
+C33333DD3333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+C33333333333333C
+.C333333333333C.
+..C3333333333C..
+...CCCCCCCCCC...`,
   ],
   [
     player2Apple,
     bitmap`
-................
-.........D......
 ........DD......
-.......DD.......
-.....5DDD55.....
-....55555555....
-...5555555555...
-...5555555555...
-..555555555555..
-..555555555555..
-..555555555555..
-..555555555555..
-...5555555555...
-....55555555....
-.....555555.....
-................`,
+...777DDD7777...
+..7555DDD55557..
+.75555DD5555557.
+755555DD55555557
+7555555555555557
+7555555555555557
+7555555555555557
+7555555555555557
+7555555555555557
+7555555555555557
+7555555555555557
+7555555555555557
+.75555555555557.
+..755555555557..
+...7777777777...`,
   ],
   [
     background,
     bitmap`
 4444444444444444
-444444444D444444
-44444444D4444444
-44444444D4444444
 4444444444444444
 4444444444444444
 4444444444444444
 4444444444444444
-4444D44444444444
-444D444444444444
-444D444444444444
-444444444444D444
-4444444444444D44
-4444444444444D44
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
+4444444444444444
 4444444444444444
 4444444444444444`,
+  ],
+  [
+    bush,
+    bitmap`
+................
+..DD....DDDDD...
+.DDDDD.DDDDDDDD.
+.DDDDDDDD444DDD.
+.DD444DD444DDDD.
+.DD444DD444DDDD.
+..DD44D44DDDD...
+...DD444DD4DDD..
+...DDDD4D44DDDD.
+..DDD4DDD4DDDDDD
+.DDDD4DD44DDDDDD
+.DDDD44D4DDDDD..
+..DDDD4D4DDDDD..
+..DDDD4DDDDDD...
+.....DDDDDD.....
+................`,
+  ],
+  [
+    flowers,
+    bitmap`
+.....D..........
+...DDDDD........
+....DDD.....33..
+.....D.....3FF3.
+...........3FF3.
+...66.......33..
+..6CC6......D...
+..6CC6......D...
+...66.......D...
+...D........D...
+...D.........D..
+...D............
+...D...DDDD.....
+..D.....DD......
+........DD......
+................`,
+  ],
+  [
+    grass,
+    bitmap`
+................
+.............D..
+............D...
+.....DD.....D...
+......D.........
+......D.........
+......D.........
+................
+..............DD
+..............D.
+..............D.
+................
+................
+...DD...........
+....D...........
+....D...........`,
   ]
 );
 
 const level = map`
-..................
-..................
-.a..............f.
-..................
-..................
-..................
-..................
-..................
-..................
-..................
-..................
-..................
-..................
-..................
-.e..............b.
-..................`;
+...........h......
+...jjj......j.....
+.a.jij..h.jjjj.h..
+...jjj.....ijj....
+....j..j...j......
+......jjjj....h...
+..h...jjij........
+......ijjj.jj...jj
+.......jj..jij..ij
+j..h........jjjjj.
+jj......h...jjjj..
+jj...jj......i...h
+ij...jij..........
+jjj...j.....jj..b.
+j.......h..jjjj.h.
+...........jijj...`;
 setMap(level);
 setBackground(background);
-
-// Start playing
-let gameLost = true;
-const allKeys = ["w", "a", "s", "d", "i", "j", "k", "l"];
-allKeys.forEach((key) => {
-  onInput(key, () => {
-    if (gameLost) {
-      gameLost = false;
-      clearText();
-      // Reset game here
-      aDir = "S";
-      bDir = "N";
-      newADir = aDir;
-      newBDir = bDir;
-      snakeA = [];
-      snakeB = [];
-      addSnake1 = false;
-      addSnake2 = false;
-      gameTime = timePerGame;
-      setMap(level);
-    }
-  });
-});
 
 // Track directions (NSEW as 0123) for both snakes
 let aDir = "S";
@@ -214,6 +259,8 @@ let snakeA = [];
 let snakeB = [];
 let addSnake1 = false;
 let addSnake2 = false;
+let delSnake1 = false;
+let delSnake2 = false;
 let player1Lost = false;
 let player2Lost = false;
 // Prevent multiple inputs before a screen update
@@ -310,8 +357,8 @@ function getNextPos() {
 // Update the snakes (main game loop)
 function updateSnake(nextPos) {
   // Check if there's a collision with the apples
-  appleA = getFirst(player1Apple);
-  appleB = getFirst(player2Apple);
+  const appleA = getFirst(player1Apple);
+  const appleB = getFirst(player2Apple);
 
   // Decide whether to add a new snake body
   if (appleA.x === nextPos[0].x && appleA.y === nextPos[0].y) {
@@ -320,6 +367,16 @@ function updateSnake(nextPos) {
   }
   if (appleB.x === nextPos[1].x && appleB.y === nextPos[1].y) {
     addSnake2 = true;
+    appleB.remove();
+  }
+
+  // Decide whether to delete a snake body
+  if (appleA.x === nextPos[1].x && appleA.y === nextPos[1].y) {
+    delSnake2 = true;
+    appleA.remove();
+  }
+  if (appleB.x === nextPos[0].x && appleB.y === nextPos[0].y) {
+    delSnake1 = true;
     appleB.remove();
   }
 
@@ -355,18 +412,22 @@ function updateBodyPositions() {
   // Update snake body (Pop off the last body if needed)
   if (addSnake1) {
     addSnake1AtCurrentPos();
-    addSnake1 = false;
-  } else if (snakeA.length > 0 && !addSnake1) {
+  } else if (snakeA.length > 0) {
     addSnake1AtCurrentPos();
     snakeA.pop().remove();
+    if (delSnake1) snakeA.pop().remove();
   }
   if (addSnake2) {
     addSnake2AtCurrentPos();
-    addSnake2 = false;
-  } else if (snakeB.length > 0 && !addSnake2) {
+  } else if (snakeB.length > 0) {
     addSnake2AtCurrentPos();
     snakeB.pop().remove();
   }
+
+  addSnake1 = false;
+  addSnake2 = false;
+  delSnake1 = false;
+  delSnake2 = false;
 }
 
 // Update the position of each head (based on movement direction)
@@ -485,10 +546,47 @@ function updateTime() {
   }
 }
 
+function beginGame() {
+  let interval = setInterval(() => {
+    const nextPos = getNextPos();
+    if (!gameLost) {
+      updateSnake(nextPos);
+    } else {
+      clearInterval(interval);
+    }
+  }, tickTime * 1000);
+}
+
 // Setup game loop
-setInterval(() => {
-  const nextPos = getNextPos();
-  if (!gameLost) {
-    updateSnake(nextPos);
-  }
-}, tickTime * 1000);
+addText("Press any button\nto start", {
+  x: Math.floor(width() / 2) - 7,
+  y: Math.floor(height() / 2) - 1,
+  color: color`0`,
+});
+let gameLost = true;
+const allKeys = ["w", "a", "s", "d", "i", "j", "k", "l"];
+allKeys.forEach((key) => {
+  onInput(key, () => {
+    if (gameLost) {
+      clearText();
+      // Reset game here
+      aDir = "S";
+      bDir = "N";
+      newADir = aDir;
+      newBDir = bDir;
+      snakeA = [];
+      snakeB = [];
+      addSnake1 = false;
+      addSnake2 = false;
+      delSnake1 = false;
+      delSnake2 = false;
+      gameTime = timePerGame;
+      setMap(level);
+      summonApples();
+      gameLost = false;
+      // Restart the game
+      beginGame();
+    }
+  });
+});
+beginGame();
