@@ -8,8 +8,8 @@ Press any key to start playing.
 
 2 Player Snake. Get as many fruit of your color 
 as you can in a minute. The one with more fruits after 60s
-wins. If you collide with something before 60s, you lose 
-regardless of your score.
+wins. When a collision happens before 60s, whoever was responsible
+for the collision (i.e. had the last input) will lose
 */
 
 // Define the 2 player snakes
@@ -195,10 +195,14 @@ allKeys.forEach((key) => {
       // Reset game here
       aDir = "S";
       bDir = "N";
+      newADir = aDir;
+      newBDir = bDir;
       snakeA = [];
       snakeB = [];
       addSnake1 = false;
       addSnake2 = false;
+      gameTime = timePerGame;
+      setMap(level);
     }
   });
 });
@@ -206,56 +210,66 @@ allKeys.forEach((key) => {
 // Track directions (NSEW as 0123) for both snakes
 let aDir = "S";
 let bDir = "N";
-let lastPosA, lastPosB;
 let snakeA = [];
 let snakeB = [];
 let addSnake1 = false;
 let addSnake2 = false;
+let player1Lost = false;
+let player2Lost = false;
+// Prevent multiple inputs before a screen update
+let newADir = aDir;
+let newBDir = bDir;
+// Track timing
+const timePerGame = 60;
+const tickTime = 0.1;
+let gameTime = timePerGame;
 
 // Player 1
 onInput("w", () => {
-  if (!(aDir == "S") || snakeA.length == 0) aDir = "N";
+  if (!(aDir == "S") || snakeA.length == 0) newADir = "N";
 });
 
 onInput("a", () => {
-  if (!(aDir == "E") || snakeA.length == 0) aDir = "W";
+  if (!(aDir == "E") || snakeA.length == 0) newADir = "W";
 });
 
 onInput("s", () => {
-  if (!(aDir == "N") || snakeA.length == 0) aDir = "S";
+  if (!(aDir == "N") || snakeA.length == 0) newADir = "S";
 });
 
 onInput("d", () => {
-  if (!(aDir == "W") || snakeA.length == 0) aDir = "E";
+  if (!(aDir == "W") || snakeA.length == 0) newADir = "E";
 });
 
 // Player 2
 onInput("i", () => {
-  if (!(bDir == "S") || snakeB.length == 0) bDir = "N";
+  if (!(bDir == "S") || snakeB.length == 0) newBDir = "N";
 });
 
 onInput("j", () => {
-  if (!(bDir == "E") || snakeB.length == 0) bDir = "W";
+  if (!(bDir == "E") || snakeB.length == 0) newBDir = "W";
 });
 
 onInput("k", () => {
-  if (!(bDir == "N") || snakeB.length == 0) bDir = "S";
+  if (!(bDir == "N") || snakeB.length == 0) newBDir = "S";
 });
 
 onInput("l", () => {
-  if (!(bDir == "W") || snakeB.length == 0) bDir = "E";
+  if (!(bDir == "W") || snakeB.length == 0) newBDir = "E";
 });
 
 // Get next position of both snakes
 function getNextPos() {
   const p1 = getFirst(player1);
   const p2 = getFirst(player2);
-  lastPosA = { x: p1.x, y: p1.y };
-  lastPosB = { x: p2.x, y: p2.y };
   let newPos = [
     [0, 0],
     [0, 0],
   ];
+
+  // Account for direction change
+  aDir = newADir;
+  bDir = newBDir;
 
   // Update positions
   switch (aDir) {
@@ -293,7 +307,7 @@ function getNextPos() {
   ];
 }
 
-// Update the snakes
+// Update the snakes (main game loop)
 function updateSnake(nextPos) {
   // Check if there's a collision with the apples
   appleA = getFirst(player1Apple);
@@ -315,6 +329,7 @@ function updateSnake(nextPos) {
   summonApples();
   displayScore();
   checkLoss();
+  updateTime();
 }
 
 // Update body positions
@@ -402,71 +417,71 @@ function displayScore() {
   const p2Score = snakeB.length;
 
   // Display the scores
+  clearText();
   addText(String(p1Score), { x: 2, y: 1, color: color`3` });
   addText(String(p2Score), { x: width() - 1, y: 1, color: color`5` });
+  // Display the time
+  addText(Math.round(gameTime).toString(), {
+    x: Math.floor(width() / 2),
+    y: 1,
+    color: color`0`,
+  });
 }
 
 // Check game loss
 function checkLoss() {
   const bodies = getAll(player1Bod).concat(getAll(player2Bod));
 
-  // Carries out what is required on losing
-  function handleLoss() {
-    gameLost = true;
-    const p1Score = snakeA.length;
-    const p2Score = snakeB.length;
-
-    // Display score
-    if (p1Score > p2Score) {
-      addText(
-        "Red wins!",
-        (options = {
-          x: Math.floor(width() / 2),
-          y: Math.floor(height() / 2),
-          color: color`0`,
-        })
-      );
-    } else if (p1Score < p2Score) {
-      addText(
-        "Blue wins!",
-        (options = {
-          x: Math.floor(width() / 2),
-          y: Math.floor(height() / 2),
-          color: color`0`,
-        })
-      );
-    } else {
-      addText(
-        "Tie!",
-        (options = {
-          x: Math.floor(width() / 2),
-          y: Math.floor(height() / 2),
-          color: color`0`,
-        })
-      );
-    }
-    addText(
-      "Press any key to restart",
-      (options = {
-        x: Math.floor(width() / 2) - 10,
-        y: Math.floor(height() / 2),
-        color: color`0`,
-      })
-    );
-  }
-
   // Check for player 1's loss
   const p1 = getFirst(player1);
   const p1LossSprites = bodies.concat(getAll(player2));
   for (sprite of p1LossSprites) {
-    if (sprite.x === p1.x && sprite.y === p1.y) handleLoss();
+    if (sprite.x === p1.x && sprite.y === p1.y) player1Lost = true;
   }
 
   // Check for player 2's loss
   const p2 = getFirst(player2);
   const p2LossSprites = bodies.concat(getAll(player1));
   for (sprite of p2LossSprites) {
-    if (sprite.x === p2.x && sprite.y === p2.y) handleLoss();
+    if (sprite.x === p2.x && sprite.y === p2.y) player2Lost = true;
+  }
+
+  // Handle loss
+  if (player1Lost || player2Lost) handleLoss(false);
+}
+
+// Manages winner display on loss
+function handleLoss(timeLoss = true) {
+  gameLost = true;
+  const p1Score = snakeA.length;
+  const p2Score = snakeB.length;
+
+  // Determine the winner message
+  let message = "Tie!";
+  if (timeLoss) {
+    if (p1Score !== p2Score) {
+      message = p1Score > p2Score ? "Red wins!" : "Blue wins!";
+    }
+  } else {
+    if (!(player1Lost && player2Lost)) {
+      message = player1Lost ? "Blue wins!" : "Red wins!";
+    }
+  }
+
+  // Display the message
+  addText(message, {
+    x: Math.floor(width() / 2) - (message === "Tie!" ? 1 : 4), // Account for different text widths
+    y: Math.floor(height() / 2),
+    color: color`0`,
+  });
+}
+
+// Update game time
+function updateTime() {
+  gameTime -= tickTime;
+  if (gameTime <= 0) {
+    gameLost = true;
+    handleLoss(true);
   }
 }
 
@@ -476,4 +491,4 @@ setInterval(() => {
   if (!gameLost) {
     updateSnake(nextPos);
   }
-}, 100);
+}, tickTime * 1000);
